@@ -1,41 +1,140 @@
 from player import *
 from game import *
 from GeneticAlgorithm import GeneticAlgorithm
+import matplotlib.pyplot as plt
 
-size = 10
-num_snakes = 1
+from tkinter import messagebox
+import tkinter as tk
+from tkinter import ttk
+import numpy as np
 
-gui_size = 600
 
-ga = GeneticAlgorithm(
-    limit_generations=500,
-    limit_population=100,
-    initial_populatin_size=10,
-    mutation_individual_prob=0.7,
-    mutation_gene_prob=0.1,
-    max_movements=50
-)
-best_individual = ga.run(True)
-best_player = GeneticPlayer(best_individual[0])
-print(best_individual)
-game = Game(size, best_player, food_xy=[(6, 7), (9, 7), (2, 6), (6, 7), (8, 7), (6, 2), (9, 2), (5, 3), (7, 9), (0, 4), (1, 0), (2, 0),
-                        (2, 5), (7, 0), (8, 4), (9, 9), (9, 4), (1, 9), (4, 6), (1, 7), (8, 8), (0, 5), (9, 5), (6, 9),
-                        (1, 5), (2, 1), (4, 9), (0, 6), (8, 0), (0, 3), (3, 5), (8, 8), (1, 7), (4, 2), (6, 7), (5, 3),
-                        (0, 6), (6, 7), (9, 3), (9, 6), (3, 5), (7, 6), (7, 9), (1, 3), (4, 0), (4, 8), (1, 6), (0, 6),
-                        (1, 3), (2, 8), (1, 7), (0, 3), (6, 2), (9, 2), (4, 0), (9, 5), (9, 1), (1, 2), (9, 9), (8, 8),
-                        (6, 8), (1, 4), (4, 2), (0, 1), (7, 4), (3, 2), (4, 0), (7, 9), (3, 3), (6, 8), (3, 5), (6, 4),
-                        (9, 0), (9, 0), (1, 9), (1, 1), (4, 0), (6, 2), (1, 6), (9, 3), (6, 2), (1, 4), (1, 6), (5, 4),
-                        (7, 3), (3, 6), (9, 3), (3, 4), (8, 4), (8, 2), (9, 2), (9, 7), (1, 9), (8, 1), (5, 9), (9, 4),
-                        (6, 7), (2, 6), (1, 8), (3, 2), (7, 7), (3, 6), (5, 3), (4, 4), (8, 3), (0, 3), (5, 4), (9, 8),
-                        (6, 9), (7, 7), (8, 9), (5, 7), (4, 5), (6, 3), (9, 5), (2, 4), (6, 0), (3, 0), (1, 3), (9, 1),
-                        (5, 1), (9, 4), (1, 3), (5, 1), (4, 8), (9, 7), (4, 7), (5, 9), (3, 8), (4, 1), (9, 4), (6, 7),
-                        (2, 5), (5, 5), (0, 1), (0, 0), (0, 2), (7, 0), (6, 0), (2, 8), (5, 9), (4, 1), (2, 4), (4, 2),
-                        (4, 5), (5, 5), (2, 0), (0, 3), (4, 1), (5, 0), (0, 3), (5, 5), (1, 8), (8, 9), (9, 2), (1, 3),
-                        (9, 3), (6, 0), (3, 1), (7, 6), (3, 8), (8, 4), (9, 7), (7, 3), (1, 5), (9, 4), (6, 8), (3, 2),
-                        (9, 9), (4, 1), (7, 5), (2, 9), (7, 2), (1, 3), (0, 8), (0, 4), (9, 3), (8, 5), (7, 9), (3, 3),
-                        (3, 1), (9, 1), (6, 3), (1, 3), (6, 9), (2, 7), (2, 0), (3, 2), (3, 2), (9, 7), (0, 1), (0, 1),
-                        (1, 7), (5, 6), (6, 2), (9, 6), (5, 0), (6, 5), (9, 0), (1, 6)], display=True, max_turns=50)
-gui = Gui(game, gui_size)
-gui.run()
 
-# GENERAR MOVIMIENTOS ALEATORIOS PARA GENERAR EL GENOTIPO Y AL MISMO TIEMPO IR JUGANDO PARA OBTENER LA APTITUD
+# root window
+root = tk.Tk()
+
+root.geometry("600x400")
+root.title('Algorítmo Genético - Maximizar y Minimizar')
+
+root.configure(bg="white")
+
+# configure the grid
+root.columnconfigure(0, weight=1)
+root.columnconfigure(1, weight=7)
+
+title_label = ttk.Label(root, text="Parámetros inciales del algoritmo", background='#fff',
+                        font=('Lucida Sands', '12', 'bold'))
+title_label.grid(column=1, row=0, )
+
+# GENERACIONS MÁXIMAS --------------------------------------------------------
+max_generations_label = ttk.Label(root, text="Generaciones máximas", background='#fff', font=('Lucida Sands', '10'))
+
+max_generations_label.grid(column=1, row=1, sticky=tk.W, padx=5, pady=5)
+
+max_generations_entry = ttk.Entry(root)
+max_generations_entry.insert(0, "500")
+max_generations_entry.grid(column=1, row=1, sticky=tk.E, padx=5, pady=5)
+
+# POBLACIÓN MÁXCIMA--------------------------------------------------------
+max_population_label = ttk.Label(root, text="Población Máxima", background='#fff', font=('Lucida Sands', '10'))
+
+max_population_label.grid(column=1, row=2, sticky=tk.W, padx=5, pady=5)
+
+max_population_entry = ttk.Entry(root)
+max_population_entry.insert(0, "100")
+max_population_entry.grid(column=1, row=2, sticky=tk.E, padx=5, pady=5)
+
+
+# POBLACIÓN INICIAL --------------------------------------------------------
+initial_population_label = ttk.Label(root, text="¨Población inicial:", background='#fff', font=('Lucida Sands', '10'))
+
+initial_population_label.grid(column=1, row=3, sticky=tk.W, padx=5, pady=5)
+
+initial_population_entry = ttk.Entry(root)
+initial_population_entry.insert(0, "10")
+initial_population_entry.grid(column=1, row=3, sticky=tk.E, padx=5, pady=5)
+
+# PROBABILIDAD DE MUTACIÓN INDIVIDUO --------------------------------------------------------
+mutacion_individuo_label = ttk.Label(root, text="Probabilidad de mutación de individuo:", background='#fff', font=('Lucida Sands', '10'))
+
+mutacion_individuo_label.grid(column=1, row=4, sticky=tk.W, padx=5, pady=5)
+
+mutacion_individuo_entry = ttk.Entry(root)
+mutacion_individuo_entry.insert(0, "0.7")
+mutacion_individuo_entry.grid(column=1, row=4, sticky=tk.E, padx=5, pady=5)
+
+
+# PROBABILIDAD DE MUTACIÓN POR GEN --------------------------------------------------------
+mutacion_gen_label = ttk.Label(root, text="Probabilidad de mutación de un gen:", background='#fff', font=('Lucida Sands', '10'))
+
+mutacion_gen_label.grid(column=1, row=5, sticky=tk.W, padx=5, pady=5)
+
+mutacion_gen_entry = ttk.Entry(root)
+mutacion_gen_entry.insert(0, "0.01")
+mutacion_gen_entry.grid(column=1, row=5, sticky=tk.E, padx=5, pady=5)
+
+
+# Movimiento máximos --------------------------------------------------------
+max_movements_label = ttk.Label(root, text="Movimiento máximos permitidos:", background='#fff', font=('Lucida Sands', '10'))
+
+max_movements_label.grid(column=1, row=6, sticky=tk.W, padx=5, pady=5)
+
+max_movements_entry = ttk.Entry(root)
+max_movements_entry.insert(0, "50")
+max_movements_entry.grid(column=1, row=6, sticky=tk.E, padx=5, pady=5)
+
+
+
+def graph(ga):
+    plt.plot(np.arange(0, ga.limit_generations), [x[2] for x in ga.best_cases], label="Best cases")
+    plt.plot(np.arange(0, ga.limit_generations), [x[2] for x in ga.worst_cases], label="Worst cases")
+    plt.plot(np.arange(0, ga.limit_generations), ga.avg_cases, label="Average cases")
+    plt.legend()
+    plt.title("Evolución de la población")
+    plt.xlabel("Generaciones/Iteraciones")
+    plt.ylabel("Valor de aptitud")
+    plt.show()
+
+
+def run():
+    size = 10
+    num_snakes = 1
+
+    gui_size = 600
+
+    food_xy = [(random.randint(0, 9), random.randint(0, 9)) for _ in range(200)]
+    ga = GeneticAlgorithm(
+        limit_generations=int(max_generations_entry.get()),
+        limit_population=int(max_population_entry.get()),
+        initial_populatin_size=int(initial_population_entry.get()),
+        mutation_individual_prob=float(mutacion_individuo_entry.get()),
+        mutation_gene_prob=float(mutacion_gen_entry.get()),
+        max_movements=int(max_movements_entry.get()),
+        food_xy=food_xy
+    )
+    best_individual = ga.run(True)
+    best_player = GeneticPlayer(best_individual[0])
+    graph(ga)
+    messagebox.showinfo(
+        message=f"Genotipo : {best_individual[0]}, Fenotipo: {best_individual[1]}, Aptitud: {best_individual[2]}",
+        title="Mejor individuo")
+
+    game = Game(size, best_player, food_xy, display=True, max_turns=50)
+    gui = Gui(game, gui_size)
+    gui.run()
+
+
+
+login_button = ttk.Button(root, text="Ejecutar", command=lambda: run())
+login_button.grid(column=1, row=15, sticky=tk.W, padx=5, pady=5)
+
+
+root.mainloop()
+
+
+
+
+
+
+
+

@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import pygame
 from pygame.constants import QUIT
-
+from tkinter import messagebox
 # Global variables
 
 UP = (-1, 0)
@@ -24,7 +24,7 @@ class Game:
         self.player = player
         self.gui = gui
         self.display = display
-        self.max_movements = 100
+        self.max_movements = max_turns
 
         self.num_food = 4
         self.movements = 0
@@ -45,80 +45,77 @@ class Game:
         self.food_index = 0
         # THIS IS FOR DEBUGGING PURPOSE. CHANGE FOR RANDOM GENERATOR IN test.py
         self.food_xy = food_xy
+        self.moves = []
 
-    def move(self):
+    def move(self, display):
 
         try:
             move_i = self.player.get_move(self.board, self.snake)
+            self.moves.append(move_i)
         except IndexError:
+            if display :
+                messagebox.showinfo(
+                    message="Cantidad máxima de movimientos alcanzada",
+                    title="Juego terminado")
             return False
-        new_square = (self.snake[-1][0] + move_i[0], self.snake[-1][1] + move_i[1])
+        if (self.snake[-1][0] + move_i[0], self.snake[-1][1] + move_i[1]) != self.snake[-2]:
+            #move_i = self.moves[-1]
 
-        self.snake.append(new_square)
-        # update tail -----------------------------------------------
-        head_i = self.snake[-1]
-        if head_i not in self.food:
-            self.board[self.snake[0][0]][self.snake[0][1]] = EMPTY
-            self.snake.pop(0)
-        else:
-            if self.display:
-                print("Eat!")
-            self.player.score += 1
-            self.food.remove(head_i)
+            new_square = (self.snake[-1][0] + move_i[0], self.snake[-1][1] + move_i[1])
+            self.snake.append(new_square)
+            # update tail -----------------------------------------------
+            head_i = self.snake[-1]
+            if head_i not in self.food:
+                self.board[self.snake[0][0]][self.snake[0][1]] = EMPTY
+                self.snake.pop(0)
+            else:
+                self.player.score += 1
+                self.food.remove(head_i)
 
-        # Check out of bounds ---------------------------------------
-        head_i = self.snake[-1]
-        if head_i[0] >= self.size or head_i[1] >= self.size or head_i[0] < 0 or head_i[1] < 0:
-            if self.display:
-                print("Out of bounds")
-            return False
-        else:
-            self.board[head_i[0], [head_i[1]]] = 1
+            # Check out of bounds ---------------------------------------
+            head_i = self.snake[-1]
+            if head_i[0] >= self.size or head_i[1] >= self.size or head_i[0] < 0 or head_i[1] < 0:
+                if display:
+                    messagebox.showinfo(
+                        message="La serpiente se ha salido de los límites de la ventana",
+                        title="Juego terminado")
+                return False
+            else:
+                self.board[head_i[0], [head_i[1]]] = 1
 
-        # Check for collisions ---------------------------------------
-        head_i = self.snake[-1]
+            # Check for collisions ---------------------------------------
+            head_i = self.snake[-1]
+            if head_i in self.snake[:-2]:
+                if display:
+                    messagebox.showinfo(
+                        message="La serpiente se ha comido a si misma.",
+                        title="Juego terminado")
+                return False
 
-        if head_i in self.snake[:-1]:
-            if self.display:
-                print("Ate it self")
-            return False
-
-        # Spawn new food ---------------------------------------------
-        while len(self.food) < self.num_food:
-            x = self.food_xy[self.food_index][0]
-            y = self.food_xy[self.food_index][1]
-            while self.board[x][y] != EMPTY:
-                self.food_index += 1
+            # Spawn new food ---------------------------------------------
+            while len(self.food) < self.num_food:
                 x = self.food_xy[self.food_index][0]
                 y = self.food_xy[self.food_index][1]
-            self.food.append((x, y))
-            self.board[x, y] = FOOD
-            self.food_index += 1
+                while self.board[x][y] != EMPTY:
+                    self.food_index += 1
+                    x = self.food_xy[self.food_index][0]
+                    y = self.food_xy[self.food_index][1]
+                self.food.append((x, y))
+                self.board[x, y] = FOOD
+                self.food_index += 1
 
+            return True
         return True
 
     def play(self, display):
-        if display:
-            self.display_board()
 
-        isAlive = self.move()
+        isAlive = self.move(display)
         if not isAlive:
             return True, self.player.score, self.movements
         self.movements += 1
 
         return False, self.player.score, self.movements
 
-    def display_board(self):
-        print("**********************************************")
-        for i in range(self.size):
-            for j in range(self.size):
-                if self.board[i][j] == EMPTY:
-                    print("|_", end="")
-                elif self.board[i][j] == FOOD:
-                    print("|#", end="")
-                else:
-                    print("|" + str(int(self.board[i][j])), end="")
-            print("|")
 
 
 class Gui:
@@ -137,9 +134,9 @@ class Gui:
 
         width, height = self.size, self.size
         self.screen = pygame.display.set_mode((width, height))
-
+        self.myfont = pygame.font.SysFont("Lucida Sands", 24, True)
         self.ga_surfaces = pygame.Surface((self.size, self.size))
-
+        pygame.display.set_caption("Snake Game - Genetic Algorithm")
         # Game loop.
 
     def run(self):
@@ -170,14 +167,15 @@ class Gui:
 
             # Update.
             self.update()
-            isDead, score, movements = self.game.play(False)
+            encode_message_label_title = self.myfont.render(f'Puntaje: {self.game.player.score}', True, pygame.Color('black'))
+            isDead, score, movements = self.game.play(True)
             if isDead:
                 pygame.quit()
                 return score, movements
                 # sys.exit()
             # Draw.
             self.screen.blit(self.ga_surfaces, (0, 0))
-
+            self.screen.blit(encode_message_label_title, (0, 0))
             pygame.display.flip()
             self.fpsClock.tick(self.fps)
 
@@ -190,13 +188,13 @@ class Gui:
             # HEAD OF SNAKE
             pygame.draw.rect(self.ga_surfaces, (255, 0, 0),
                              pygame.Rect((self.ratio * (self.game.snake[-1][1]), self.ratio * (self.game.snake[-1][0])),
-                                         (self.size // self.game.size, self.size // self.game.size)))
+                                         (self.size // self.game.size, self.size // self.game.size)), border_radius=10)
             # TAIL OF SNAKE
             for j in range(len(self.game.snake) - 1):
                 pygame.draw.rect(self.ga_surfaces, (0, 0, 255),
                                  pygame.Rect(
                                      (self.ratio * (self.game.snake[j][1]), self.ratio * (self.game.snake[j][0])),
-                                     (self.size // self.game.size, self.size // self.game.size)))
+                                     (self.size // self.game.size, self.size // self.game.size)), border_radius=10)
             # FOOD
         for food in self.game.food:
             pygame.draw.rect(self.ga_surfaces, (255, 255, 255),
