@@ -119,26 +119,3 @@ class GeneticAlgorithm:
             generation += 1
 
         return self.population[0][0], self.population[0][1], self.population[0][2]
-
-
-
-
-"""
-            x = []
-            y = []
-            for individual in self.population:
-                x.append(individual[4])
-                y.append(individual[5])
-
-            colors = np.random.uniform(15, 80, len(x))
-            # plot
-            fig, ax = plt.subplots()
-            ax.scatter(x, y, c=colors, vmin=0, vmax=100)
-
-            ax.set(xlim=(self.interval_x[0], self.interval_x[1]), xticks=np.arange(0, self.interval_x[1]),
-                   ylim=(self.interval_y[0], self.interval_y[1]), yticks=np.arange(0, self.interval_x[1]))
-            plt.title(f"Generación {generation}")
-            plt.xlabel("x")
-            plt.ylabel("y")
-            plt.savefig(f"images/generation {generation}.png")
-"""

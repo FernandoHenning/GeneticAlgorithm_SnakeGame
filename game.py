@@ -141,17 +141,17 @@ class Gui:
 
     def run(self):
         while True:
-            self.screen.fill((0, 0, 0))
+            self.screen.fill((45, 66, 99))
             for i in range(len(self.game.snake)):
 
                 # HEAD OF SNAKE
-                pygame.draw.rect(self.ga_surfaces, (255, 0, 0),
+                pygame.draw.rect(self.ga_surfaces, (200, 75, 49),
                                  pygame.Rect(
                                      (self.ratio * (self.game.snake[-1][1]), self.ratio * (self.game.snake[-1][0])),
                                      (self.size // self.game.size, self.size // self.game.size)))
                 # TAIL OF SNAKE
                 for j in range(len(self.game.snake) - 1):
-                    pygame.draw.rect(self.ga_surfaces, (0, 0, 255),
+                    pygame.draw.rect(self.ga_surfaces, (236, 219, 186),
                                      pygame.Rect(
                                          ((self.game.snake[j][1] + 1), self.ratio * (self.game.snake[j][0] + 1)),
                                          (self.size // self.game.size, self.size // self.game.size)))
@@ -167,7 +167,7 @@ class Gui:
 
             # Update.
             self.update()
-            encode_message_label_title = self.myfont.render(f'Puntaje: {self.game.player.score}', True, pygame.Color('black'))
+            encode_message_label_title = self.myfont.render(f'Puntaje: {self.game.player.score}', True, pygame.Color('white'))
             isDead, score, movements = self.game.play(True)
             if isDead:
                 pygame.quit()
@@ -180,18 +180,17 @@ class Gui:
             self.fpsClock.tick(self.fps)
 
     def update(self):
-        empty = pygame.Color(0, 0, 0, 0)
-        self.ga_surfaces.fill(empty)
-        self.ga_surfaces.fill((55, 155, 255))
+
+        self.ga_surfaces.fill((45, 66, 99))
         for i in range(len(self.game.snake)):
 
             # HEAD OF SNAKE
-            pygame.draw.rect(self.ga_surfaces, (255, 0, 0),
+            pygame.draw.rect(self.ga_surfaces, (200, 75, 49),
                              pygame.Rect((self.ratio * (self.game.snake[-1][1]), self.ratio * (self.game.snake[-1][0])),
                                          (self.size // self.game.size, self.size // self.game.size)), border_radius=10)
             # TAIL OF SNAKE
             for j in range(len(self.game.snake) - 1):
-                pygame.draw.rect(self.ga_surfaces, (0, 0, 255),
+                pygame.draw.rect(self.ga_surfaces, (236, 219, 186),
                                  pygame.Rect(
                                      (self.ratio * (self.game.snake[j][1]), self.ratio * (self.game.snake[j][0])),
                                      (self.size // self.game.size, self.size // self.game.size)), border_radius=10)
