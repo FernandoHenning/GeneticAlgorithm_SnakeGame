@@ -77,9 +77,7 @@ class GeneticAlgorithm:
         self.population = self.population[:self.limit_population]
 
     def random_crossover(self, a, b):
-        p1 = random.randint(0, self.max_movements)
-        p2 = random.randint(p1, self.max_movements)
-        p3 = random.randint(p2, self.max_movements)
+        p1, p2, p3 = sorted(random.sample([number for number in range(0, self.max_movements, 1)], 3))
         genotype_a = a[0][0:p1] + b[0][p1:p2] + a[0][p2:p3] + b[0][p3:]
         genotype_b = a[0][0:p1] + b[0][p1:p2] + a[0][p2:p3] + b[0][p3:]
         offspring_a = self.generate_individual(genotype_a)
