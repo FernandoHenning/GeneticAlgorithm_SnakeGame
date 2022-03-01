@@ -45,10 +45,15 @@ class GeneticAlgorithm:
     def mutate(self, individual):
         p = random.random()
         if p < self.mutation_individual_prob:
-            for _ in range(self.max_movements):
-                index = random.randrange(self.max_movements)
-                individual[0][index] = individual[0][index] if random.random() > self.mutation_gene_prob else \
-                    abs(individual[0][index] - 1)
+            for index in range(self.max_movements):
+                random_gene_value = random.randrange(0, 3, 1)
+                if random.random() < self.mutation_gene_prob:
+                    while True:
+                        if random_gene_value != individual[0][index]:
+                            individual[0][index] = random_gene_value
+                            break
+                        else:
+                            random_gene_value = random.randrange(3)
 
             individual = self.generate_individual(individual[0])
             return individual
